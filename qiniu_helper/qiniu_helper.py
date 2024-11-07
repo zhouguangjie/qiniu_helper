@@ -163,6 +163,29 @@ def get_domain_info(domain):
         return None
 
 
+def domain_switch_to_https(domain, cert_id, forceHttps, http2Enable):
+    api_path = "domain/{0}/sslize".format(domain)
+    requrl = "{0}/{1}".format(api_host, api_path)
+    headers = gen_req_headers(requrl)
+    data = {"certid": cert_id, "forceHttps": forceHttps, "http2Enable": http2Enable}
+    resp = requests.put(requrl, headers=headers, json=data)
+    if resp.ok:
+        print("switch to https:{0}".format(domain))
+    else:
+        print(resp.text)
+
+
+def domain_switch_to_http(domain):
+    api_path = "domain/{0}/unsslize".format(domain)
+    requrl = "{0}/{1}".format(api_host, api_path)
+    headers = gen_req_headers(requrl)
+    resp = requests.put(requrl, headers=headers)
+    if resp.ok:
+        print("switch to http:{0}".format(domain))
+    else:
+        print(resp.text)
+
+
 def bind_domain_cert(domain, cert_id, forceHttps, http2Enable):
     api_path = "domain/{0}/httpsconf".format(domain)
     requrl = "{0}/{1}".format(api_host, api_path)
@@ -208,7 +231,7 @@ def renew_domain_cert(conf_path):
                     else:
                         print("already binded:{0}:#id<{1}>".format(domain, cert_id))
                 else:
-                    bind_domain_cert(domain, cert_id, False, False)
+                    domain_switch_to_https(domain, cert_id, False, False)
 
 
 def print_help():
