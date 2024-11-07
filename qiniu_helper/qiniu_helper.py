@@ -224,7 +224,9 @@ def renew_domain_cert(conf_path):
                 domain_info = get_domain_info(domain)
                 https = domain_info["https"]
                 if https:
-                    if cert_id != https["certId"]:
+                    if https["certId"] == "":
+                        domain_switch_to_https(domain, cert_id, False, False)
+                    elif cert_id != https["certId"]:
                         forceHttps = https["forceHttps"]
                         http2Enable = https["http2Enable"]
                         bind_domain_cert(domain, cert_id, forceHttps, http2Enable)
