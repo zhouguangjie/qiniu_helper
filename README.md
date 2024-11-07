@@ -6,8 +6,8 @@
 ### 使用方法
 1. 在七牛云添加相应的域名
 
-2. 新建一个配置文件，参考[模板](https://github.com/zhouguangjie/qiniu_helper/blob/main/qiniu_helper/domain_cert.template.json)
+2. 新建一个配置文件，参考[模板](https://github.com/zhouguangjie/qiniu_helper/blob/main/src/domain_cert.template.json)
 
 3. 设置定期执行脚本
 
-    `python ./qiniu_helper/qiniu_helper.py --renew <配置文件路径>`
+    `python ./src/qiniu_helper.py --renew <配置文件路径>`
