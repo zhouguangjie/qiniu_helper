@@ -1,0 +1,15 @@
+{
+    "accessKey": "qiniu_accesskey",
+    "secretKey": "qiniu_secretkey",
+    "certs": [
+        {
+            "cert": "/home/user/.acme.sh/*.testdomain.com_ecc/fullchain.cer",
+            "key": "/home/user/.acme.sh/*.testdomain.com_ecc/*.testdomain.com.key",
+            "commonName": "*.testdomain.com",
+            "domains": [
+                "a.testdomain.com",
+                "b.testdomain.com"
+            ]
+        }
+    ]
+}
