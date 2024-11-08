@@ -4,7 +4,7 @@
 使用acme.sh定期获取新证书，再使用本脚本检查七牛云上的证书并更新。acme.sh用法参考：[acme.sh](https://github.com/acmesh-official/acme.sh)
 
 ### 设置脚本需要的环境变量
-调用脚本前都要设置七牛API的accesskey和secretkey环境变量
+调用脚本前都要设置七牛API的accesskey和secretkey环境变量  
     `export QINIU_ACCESSKEY=<accesskey>`  
     `export QINIU_SECRETKEY=<secretkey>`  
 
