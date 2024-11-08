@@ -5,7 +5,7 @@
 
 ### 设置脚本需要的环境变量
 调用脚本前都要设置七牛API的accesskey和secretkey环境变量
-`export QINIU_ACCESSKEY=<accesskey>`
+`export QINIU_ACCESSKEY=<accesskey>`  
 
 `export QINIU_SECRETKEY=<secretkey>`
 
