@@ -5,12 +5,13 @@ import hashlib
 from urllib.parse import urlparse
 from base64 import urlsafe_b64encode
 import requests, json
-import sys, getopt
+import sys, getopt, time, os
 
 # api doc: https://developer.qiniu.com/fusion/4243/access-to-the
 api_host = "https://api.qiniu.com"
-access_key = "AK"
-secret_key = "SK"
+fixed_cert_name_prefix = "qiniu_helper_"
+access_key = ""
+secret_key = ""
 exists_certs = {}
 
 
@@ -48,6 +49,7 @@ def hmac_sha1(data):
 
 
 def token_of_request(url, body=None, content_type=None):
+    validate_accesskeys_or_exit()
     parsed_url = urlparse(url)
     query = parsed_url.query
     path = parsed_url.path
@@ -76,12 +78,9 @@ def gen_req_headers(requrl):
 
 
 def load_conf(conf_path):
-    global access_key, secret_key
     with open(conf_path, "r") as file:
         jstr = file.read()
         jobj = json.loads(jstr)
-        access_key = jobj["accessKey"]
-        secret_key = jobj["secretKey"]
         return jobj
 
 
@@ -97,8 +96,10 @@ def fetch_exists_certs():
             cert_name = cert["name"]
             cert_id = cert["certid"]
             exists_certs[cert_name] = cert_id
+        return certs
     else:
         print(resp.text)
+        return None
 
 
 def read_text_content(path):
@@ -108,7 +109,7 @@ def read_text_content(path):
 
 
 def get_cert_name(cert_path):
-    cert_name = "qiniu_helper_{0}".format(md5_file(cert_path))
+    cert_name = "{0}{1}".format(fixed_cert_name_prefix, md5_file(cert_path))
     return cert_name
 
 
@@ -236,22 +237,54 @@ def renew_domain_cert(conf_path):
                     domain_switch_to_https(domain, cert_id, False, False)
 
 
+def remove_expired_domain_certs():
+    certs = fetch_exists_certs()
+    cur_ts = time.time()
+    for cert in certs:
+        cert_name: str = cert["name"]
+        cert_id = cert["certid"]
+        expired_ts = cert["not_after"]
+        if cert_name.startswith(fixed_cert_name_prefix):
+            if expired_ts < cur_ts:
+                print("expired cert:{0}".format(cert_name))
+                delete_cert(cert_id)
+            else:
+                print("indate cert:{0}".format(cert_name))
+
+
 def print_help():
     print("qiniu helper")
     # print("--cert_name <cert path>  :print the md5 hash cert name")
+    print("-h|--help                :print help")
     print("--renew <config>         :renew domain cert with a config")
-    print("-h                       :print help")
+    print("--rm_expired <config>    :remove expired certs with config")
+
+
+def validate_accesskeys_or_exit():
+    if access_key == "" or secret_key == "":
+        print("invalid accesskey or secretkey")
+        print("require set env values:QINIU_ACCESSKEY,QINIU_SECRETKEY")
+        sys.exit(2)
 
 
 # main
+envAK = os.environ.get("QINIU_ACCESSKEY")
+envSK = os.environ.get("QINIU_SECRETKEY")
+if envAK:
+    access_key = envAK
+if envSK:
+    secret_key = envSK
+
 argv = sys.argv[1:]
 try:
-    opts, args = getopt.getopt(argv, "h", ["renew=", "cert_name="])
+    opts, args = getopt.getopt(
+        argv, "h", ["help", "renew=", "rm_expired", "https_off=", "cert_name="]
+    )
 except getopt.GetoptError:
     print_help()
     sys.exit(2)
 for opt, arg in opts:
-    if opt == "-h":
+    if opt in ("--help", "-h"):
         print_help()
         sys.exit()
     elif opt == "--cert_name":
@@ -261,5 +294,10 @@ for opt, arg in opts:
         print("renew domain cert with config: {0}".format(arg))
         renew_domain_cert(arg)
         sys.exit()
-
+    elif opt in ("--rm_expired"):
+        remove_expired_domain_certs()
+        sys.exit()
+    elif opt in ("--https_off"):
+        domain_switch_to_http(arg)
+        sys.exit()
 print_help()

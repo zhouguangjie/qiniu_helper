@@ -1,6 +1,4 @@
 {
-    "accessKey": "qiniu_accesskey",
-    "secretKey": "qiniu_secretkey",
     "certs": [
         {
             "cert": "/home/user/.acme.sh/*.testdomain.com_ecc/fullchain.cer",
