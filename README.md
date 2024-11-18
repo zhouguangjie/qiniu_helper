@@ -5,8 +5,8 @@
 
 ### 设置脚本需要的环境变量
 调用脚本前都要设置七牛API的accesskey和secretkey环境变量  
-    `export QINIU_ACCESSKEY=<accesskey>`  
-    `export QINIU_SECRETKEY=<secretkey>`  
+    `export QINIU_ACCESSKEY="qiniu accesskey"`  
+    `export QINIU_SECRETKEY="qiniu secretkey"`  
 
 ### 定期更新域名证书
 1. 在七牛云添加相应的域名  
