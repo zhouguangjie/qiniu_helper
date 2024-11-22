@@ -144,11 +144,11 @@ def delete_cert(cert_id):
     headers = gen_req_headers(requrl)
     resp = requests.delete(requrl, headers=headers)
     if resp.ok:
-        for k, v in exists_certs:
+        print("cert deleted:{0}".format(cert_id))
+        for k, v in exists_certs.items():
             if v == cert_id:
                 exists_certs.pop(k)
                 break
-        print("cert deleted:{0}".format(cert_id))
     else:
         print(resp.text)
 
