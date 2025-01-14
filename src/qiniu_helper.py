@@ -15,6 +15,11 @@ secret_key = ""
 exists_certs = {}
 
 
+def log(msg):
+    loctime_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    print("[{0}] {1}".format(loctime_str, msg))
+
+
 def md5_file(file_path):
     hash_md5 = hashlib.md5()
     with open(file_path, "rb") as f:
@@ -98,7 +103,7 @@ def fetch_exists_certs():
             exists_certs[cert_name] = cert_id
         return certs
     else:
-        print(resp.text)
+        log(resp.text)
         return None
 
 
@@ -119,7 +124,7 @@ def upload_cert(cert_content, key_content, cert_name, common_name):
     headers = gen_req_headers(requrl)
 
     if exists_certs.get(cert_name):
-        print("cert exists:{0}".format(cert_name))
+        log("cert exists:{0}".format(cert_name))
     else:
         data = {
             "name": cert_name,
@@ -133,9 +138,9 @@ def upload_cert(cert_content, key_content, cert_name, common_name):
             jobj = json.loads(resp.text)
             cert_id = jobj["certID"]
             exists_certs[cert_name] = cert_id
-            print("new cert uploaded:{0} #id<{1}>".format(cert_name, cert_id))
+            log("new cert uploaded:{0} #id<{1}>".format(cert_name, cert_id))
         else:
-            print(resp.text)
+            log(resp.text)
 
 
 def delete_cert(cert_id):
@@ -144,13 +149,13 @@ def delete_cert(cert_id):
     headers = gen_req_headers(requrl)
     resp = requests.delete(requrl, headers=headers)
     if resp.ok:
-        print("cert deleted:{0}".format(cert_id))
+        log("cert deleted:{0}".format(cert_id))
         for k, v in exists_certs.items():
             if v == cert_id:
                 exists_certs.pop(k)
                 break
     else:
-        print(resp.text)
+        log(resp.text)
 
 
 def get_domain_info(domain):
@@ -171,9 +176,9 @@ def domain_switch_to_https(domain, cert_id, forceHttps, http2Enable):
     data = {"certid": cert_id, "forceHttps": forceHttps, "http2Enable": http2Enable}
     resp = requests.put(requrl, headers=headers, json=data)
     if resp.ok:
-        print("switch to https:{0}".format(domain))
+        log("switch to https:{0}".format(domain))
     else:
-        print(resp.text)
+        log(resp.text)
 
 
 def domain_switch_to_http(domain):
@@ -182,9 +187,9 @@ def domain_switch_to_http(domain):
     headers = gen_req_headers(requrl)
     resp = requests.put(requrl, headers=headers)
     if resp.ok:
-        print("switch to http:{0}".format(domain))
+        log("switch to http:{0}".format(domain))
     else:
-        print(resp.text)
+        log(resp.text)
 
 
 def bind_domain_cert(domain, cert_id, forceHttps, http2Enable):
@@ -194,9 +199,9 @@ def bind_domain_cert(domain, cert_id, forceHttps, http2Enable):
     data = {"certId": cert_id, "forceHttps": forceHttps, "http2Enable": http2Enable}
     resp = requests.put(requrl, headers=headers, json=data)
     if resp.ok:
-        print("new cert binded:{0}#id<{1}>".format(domain, cert_id))
+        log("new cert binded:{0}#id<{1}>".format(domain, cert_id))
     else:
-        print(resp.text)
+        log(resp.text)
 
 
 def renew_domain_cert(conf_path):
@@ -213,7 +218,7 @@ def renew_domain_cert(conf_path):
         cert_id = None
         cert_id = exists_certs.get(cert_name)
         if cert_id:
-            print("exists cert:{0}#id:<{1}>".format(cert_name, cert_id))
+            log("exists cert:{0}#id:<{1}>".format(cert_name, cert_id))
         else:
             cert_content = read_text_content(cert_path)
             key_content = read_text_content(cert_key_path)
@@ -232,7 +237,7 @@ def renew_domain_cert(conf_path):
                         http2Enable = https["http2Enable"]
                         bind_domain_cert(domain, cert_id, forceHttps, http2Enable)
                     else:
-                        print("already binded:{0}:#id<{1}>".format(domain, cert_id))
+                        log("already binded:{0}:#id<{1}>".format(domain, cert_id))
                 else:
                     domain_switch_to_https(domain, cert_id, False, False)
 
@@ -246,10 +251,10 @@ def remove_expired_domain_certs():
         expired_ts = cert["not_after"]
         if cert_name.startswith(fixed_cert_name_prefix):
             if expired_ts < cur_ts:
-                print("expired cert:{0}".format(cert_name))
+                log("expired cert:{0}".format(cert_name))
                 delete_cert(cert_id)
             else:
-                print("indate cert:{0}".format(cert_name))
+                log("indate cert:{0}".format(cert_name))
 
 
 def print_help():
